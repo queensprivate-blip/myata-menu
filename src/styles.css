@@ -43,21 +43,27 @@ button { font: inherit; }
   z-index: 1;
   width: min(100%, 600px);
   min-height: 100svh;
-  margin: auto;
+  margin: 0 auto;
   padding: max(22px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: flex-start;
+
   gap: 14px;
 }
 
 .brand-trigger {
-  display: grid;
-  justify-items: center;
-  gap: 3px;
-  width: min(82%, 430px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: min(440px, calc(100vw - 40px));
   margin: 4px auto 18px;
   padding: 0;
+
   border: 0;
   background: transparent;
   color: var(--gold-light);
@@ -66,11 +72,25 @@ button { font: inherit; }
 
 .brand-logo {
   display: block;
-  width: 100%;
-  max-height: 142px;
+
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 190px;
+
+  margin: 0 auto;
+
   object-fit: contain;
-  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.35)) sepia(0.12) saturate(0.92) brightness(0.96);
-  opacity: 0.84;
+  object-position: center;
+
+  opacity: 0.82;
+  mix-blend-mode: screen;
+
+  filter:
+    drop-shadow(0 0 10px rgba(207, 166, 91, 0.22))
+    saturate(0.9)
+    brightness(0.92)
+    contrast(1.03);
 }
 
 .brand-hint {
@@ -204,8 +224,12 @@ button { font: inherit; }
   }
 
   .brand-trigger {
-    width: min(78%, 360px);
+    width: min(300px, calc(100vw - 48px));
     margin-bottom: 12px;
+  }
+
+  .brand-logo {
+    max-height: 155px;
   }
 }
 
