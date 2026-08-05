@@ -2,7 +2,17 @@ import { supabase } from './supabase-client.js';
 
 const esc = (v='') => String(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');
 const slug = (v='item') => String(v).toLowerCase().replace(/[^a-zа-я0-9]+/gi,'-').replace(/^-|-$/g,'').slice(0,60) || 'item';
-let state = { tab:'items', items:[], sections:[], promotions:[], rules:[], venue:null, query:'', type:'all' };
+let state = {
+  tab: 'items',
+  items: [],
+  sections: [],
+  promotions: [],
+  rules: [],
+  venue: null,
+  query: '',
+  type: 'all',
+  section: 'all',
+};
 
 async function loadAll(){
   const [items,sections,promotions,rules,venue] = await Promise.all([
@@ -30,24 +40,62 @@ function tabs(){ return [['items','Позиции'],['sections','Категор�
 function field(label,content){return `<label class="admin-field"><span>${label}</span>${content}</label>`;}
 function sectionOptions(selected=''){return state.sections.map(s=>`<option value="${esc(s.section_id)}" ${s.section_id===selected?'selected':''}>${esc(s.title)}</option>`).join('');}
 
-function itemRows(){
- const q=state.query.toLowerCase();
- return state.items.filter(i=>(state.type==='all'||i.type===state.type)&&(!q||`${i.name} ${i.section_title}`.toLowerCase().includes(q))).map(i=>`<article class="admin-pro-card" data-item-key="${esc(i.item_key)}">
-  <div class="admin-pro-head">${i.image_url?`<img src="${esc(i.image_url)}" alt="">`:'<span class="admin-photo-empty">Фото</span>'}<div><small>${esc(i.type)} · ${esc(i.section_title)}</small><strong>${esc(i.name)}</strong></div><button class="admin-danger-ghost" data-item-archive>${i.archived?'Восстановить':'Удалить'}</button></div>
-  <div class="admin-form-grid">
-   ${field('Название',`<input data-f="name" value="${esc(i.name)}">`)}
-   ${field('Цена',`<input data-f="price" type="number" min="0" value="${esc(i.price)}">`)}
-   ${field('Объём',`<input data-f="volume" value="${esc(i.volume||'')}">`)}
-   ${field('Раздел',`<select data-f="section_id">${sectionOptions(i.section_id)}</select>`)}
-   ${field('Описание',`<textarea data-f="description">${esc(i.description||'')}</textarea>`)}
-   ${field('Фото',`<input data-item-file type="file" accept="image/*">`)}
-   ${field('Порядок',`<input data-f="sort_order" type="number" value="${esc(i.sort_order||0)}">`)}
-   ${field('В меню',`<input data-f="available" type="checkbox" ${i.available&&!i.archived?'checked':''}>`)}
-  </div><button class="admin-primary small" data-item-save>Сохранить позицию</button>
- </article>`).join('') || '<p class="admin-empty">Ничего не найдено.</p>';
+function sectionFilterOptions(selected='all'){
+  const filteredSections = state.sections.filter((section) => state.type === 'all' || section.type === state.type);
+  return [
+    '<option value="all">Все категории</option>',
+    ...filteredSections.map((section) => `<option value="${esc(section.section_id)}" ${section.section_id === selected ? 'selected' : ''}>${esc(section.title)}</option>`),
+  ].join('');
 }
 
-function itemsTab(){return `<div class="admin-tab-toolbar"><input placeholder="Поиск по меню" data-admin-search value="${esc(state.query)}"><select data-admin-type><option value="all">Все</option><option value="bar" ${state.type==='bar'?'selected':''}>Бар</option><option value="hookah" ${state.type==='hookah'?'selected':''}>Кальяны</option></select><button class="admin-primary" data-add-item>Добавить позицию</button></div><div class="admin-pro-list">${itemRows()}</div>`;}
+
+function itemRows(){
+  const query = state.query.toLowerCase();
+
+  return state.items
+    .filter((item) =>
+      (state.type === 'all' || item.type === state.type) &&
+      (state.section === 'all' || item.section_id === state.section) &&
+      (!query || `${item.name} ${item.section_title}`.toLowerCase().includes(query))
+    )
+    .map((item) => `<article class="admin-pro-card" data-item-key="${esc(item.item_key)}">
+      <div class="admin-pro-head">
+        ${item.image_url ? `<img src="${esc(item.image_url)}" alt="">` : '<span class="admin-photo-empty">Фото</span>'}
+        <div>
+          <small>${esc(item.type)} · ${esc(item.section_title)}</small>
+          <strong>${esc(item.name)}</strong>
+        </div>
+        <button class="admin-danger-ghost" data-item-archive>${item.archived ? 'Восстановить' : 'Удалить'}</button>
+      </div>
+      <div class="admin-form-grid">
+        ${field('Название', `<input data-f="name" value="${esc(item.name)}">`)}
+        ${field('Цена', `<input data-f="price" type="number" min="0" value="${esc(item.price)}">`)}
+        ${field('Объём', `<input data-f="volume" value="${esc(item.volume || '')}">`)}
+        ${field('Раздел', `<select data-f="section_id">${sectionOptions(item.section_id)}</select>`)}
+        ${field('Описание', `<textarea data-f="description">${esc(item.description || '')}</textarea>`)}
+        ${field('Фото', '<input data-item-file type="file" accept="image/*">')}
+        ${field('Порядок', `<input data-f="sort_order" type="number" value="${esc(item.sort_order || 0)}">`)}
+        ${field('В меню', `<input data-f="available" type="checkbox" ${item.available && !item.archived ? 'checked' : ''}>`)}
+      </div>
+      <button class="admin-primary small" data-item-save>Сохранить позицию</button>
+    </article>`)
+    .join('') || '<p class="admin-empty">Ничего не найдено.</p>';
+}
+
+function itemsTab(){
+  return `<div class="admin-tab-toolbar admin-tab-toolbar--items">
+    <input placeholder="Поиск по меню" data-admin-search value="${esc(state.query)}">
+    <select data-admin-type>
+      <option value="all">Все типы</option>
+      <option value="bar" ${state.type === 'bar' ? 'selected' : ''}>Бар</option>
+      <option value="hookah" ${state.type === 'hookah' ? 'selected' : ''}>Кальяны</option>
+    </select>
+    <select data-admin-section>${sectionFilterOptions(state.section)}</select>
+    <button class="admin-primary" data-add-item>Добавить позицию</button>
+  </div>
+  <div class="admin-filter-hint">Выберите тип меню и конкретную категорию, чтобы не листать все позиции подряд.</div>
+  <div class="admin-pro-list">${itemRows()}</div>`;
+}
 function sectionsTab(){return `<div class="admin-actions-line"><button class="admin-primary" data-add-section>Добавить категорию</button></div><div class="admin-pro-list">${state.sections.map(s=>`<article class="admin-pro-card" data-section-id="${esc(s.section_id)}"><div class="admin-form-grid">${field('Название',`<input data-f="title" value="${esc(s.title)}">`)}${field('Описание',`<input data-f="note" value="${esc(s.note||'')}">`)}${field('Тип',`<select data-f="type"><option value="bar" ${s.type==='bar'?'selected':''}>Бар</option><option value="hookah" ${s.type==='hookah'?'selected':''}>Кальяны</option></select>`)}${field('Группа',`<input data-f="parent_group" value="${esc(s.parent_group||'')}">`)}${field('Порядок',`<input data-f="sort_order" type="number" value="${s.sort_order||0}">`)}${field('Показывать',`<input data-f="visible" type="checkbox" ${s.visible?'checked':''}>`)}</div><div class="admin-card-actions"><button class="admin-primary small" data-section-save>Сохранить</button><button class="admin-danger-ghost" data-section-delete>Удалить</button></div></article>`).join('')}</div>`;}
 function promotionsTab(){return `<div class="admin-actions-line"><button class="admin-primary" data-add-promotion>Добавить акцию</button></div><div class="admin-pro-list">${state.promotions.map(p=>`<article class="admin-pro-card" data-promotion-id="${p.id}">${p.image_url?`<img class="admin-banner-preview" src="${esc(p.image_url)}" alt="">`:''}<div class="admin-form-grid">${field('Название',`<input data-f="title" value="${esc(p.title)}">`)}${field('Метка',`<input data-f="type_label" value="${esc(p.type_label||'Акция')}">`)}${field('Текст',`<textarea data-f="text">${esc(p.text||'')}</textarea>`)}${field('Изображение',`<input data-promo-file type="file" accept="image/*">`)}${field('Порядок',`<input data-f="sort_order" type="number" value="${p.sort_order||0}">`)}${field('Показывать',`<input data-f="visible" type="checkbox" ${p.visible?'checked':''}>`)}</div><div class="admin-card-actions"><button class="admin-primary small" data-promotion-save>Сохранить</button><button class="admin-danger-ghost" data-promotion-delete>Удалить</button></div></article>`).join('')}</div>`;}
 function rulesTab(){return `<div class="admin-actions-line"><button class="admin-primary" data-add-rule>Добавить правило</button></div><div class="admin-pro-list">${state.rules.map(r=>`<article class="admin-pro-card" data-rule-id="${r.id}"><div class="admin-form-grid">${field('Заголовок',`<input data-f="title" value="${esc(r.title)}">`)}${field('Текст',`<textarea data-f="text">${esc(r.text||'')}</textarea>`)}${field('Порядок',`<input data-f="sort_order" type="number" value="${r.sort_order||0}">`)}${field('Показывать',`<input data-f="visible" type="checkbox" ${r.visible?'checked':''}>`)}</div><div class="admin-card-actions"><button class="admin-primary small" data-rule-save>Сохранить</button><button class="admin-danger-ghost" data-rule-delete>Удалить</button></div></article>`).join('')}</div>`;}
@@ -59,10 +107,23 @@ async function refresh(render){await loadAll(); render();}
 
 function bind(render){
  document.querySelectorAll('[data-admin-tab]').forEach(b=>b.onclick=()=>{state.tab=b.dataset.adminTab;render();});
- document.querySelector('[data-admin-search]')?.addEventListener('input',e=>{state.query=e.target.value;render();});
- document.querySelector('[data-admin-type]')?.addEventListener('change',e=>{state.type=e.target.value;render();});
+ document.querySelector('[data-admin-search]')?.addEventListener('input',(event)=>{state.query=event.target.value;render();});
+ document.querySelector('[data-admin-type]')?.addEventListener('change',(event)=>{
+  state.type=event.target.value;
+  const allowedSections=new Set(state.sections.filter((section)=>state.type==='all'||section.type===state.type).map((section)=>section.section_id));
+  if(state.section!=='all'&&!allowedSections.has(state.section)) state.section='all';
+  render();
+ });
+ document.querySelector('[data-admin-section]')?.addEventListener('change',(event)=>{state.section=event.target.value;render();});
  document.querySelector('[data-admin-logout]')?.addEventListener('click',async()=>{await supabase.auth.signOut();location.hash='#home';location.reload();});
- document.querySelector('[data-add-item]')?.addEventListener('click',async()=>{const s=state.sections.find(x=>x.type==='bar')||state.sections[0]; const key=`bar:${s?.section_id||'new'}:${Date.now()}`; const {error}=await supabase.from('menu_items').insert({item_key:key,type:s?.type||'bar',section_id:s?.section_id||'new',section_title:s?.title||'Новый раздел',name:'Новая позиция',price:0,sort_order:999}); if(error)return toast(error.message,true); await refresh(render);});
+ document.querySelector('[data-add-item]')?.addEventListener('click',async()=>{
+  const filteredSections=state.sections.filter((section)=>(state.type==='all'||section.type===state.type)&&(state.section==='all'||section.section_id===state.section));
+  const section=filteredSections[0]||state.sections.find((item)=>item.type==='bar')||state.sections[0];
+  const key=`${section?.type||'bar'}:${section?.section_id||'new'}:${Date.now()}`;
+  const {error}=await supabase.from('menu_items').insert({item_key:key,type:section?.type||'bar',section_id:section?.section_id||'new',section_title:section?.title||'Новый раздел',name:'Новая позиция',price:0,sort_order:999});
+  if(error)return toast(error.message,true);
+  await refresh(render);
+ });
  document.querySelectorAll('[data-item-save]').forEach(b=>b.onclick=async()=>{const c=b.closest('[data-item-key]'), values=readCard(c); const section=state.sections.find(s=>s.section_id===values.section_id); values.section_title=section?.title||values.section_id; values.type=section?.type||'bar'; const file=c.querySelector('[data-item-file]')?.files?.[0]; if(file) values.image_url=await upload(file,'items'); const {error}=await supabase.from('menu_items').update(values).eq('item_key',c.dataset.itemKey); if(error)return toast(error.message,true); toast('Позиция сохранена'); await refresh(render);});
  document.querySelectorAll('[data-item-archive]').forEach(b=>b.onclick=async()=>{const c=b.closest('[data-item-key]'), row=state.items.find(i=>i.item_key===c.dataset.itemKey); const {error}=await supabase.from('menu_items').update({archived:!row.archived,available:row.archived}).eq('item_key',row.item_key); if(error)return toast(error.message,true); await refresh(render);});
  document.querySelector('[data-add-section]')?.addEventListener('click',async()=>{const id=`section-${Date.now()}`; const {error}=await supabase.from('menu_sections').insert({section_id:id,type:'bar',title:'Новая категория',sort_order:999}); if(error)return toast(error.message,true); await refresh(render);});
