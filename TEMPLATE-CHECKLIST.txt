@@ -1,0 +1,14 @@
+ЧЕК-ЛИСТ НОВОГО ЗАВЕДЕНИЯ
+
+1. Переименовать папку и репозиторий.
+2. Изменить src/brand-config.js.
+3. Заменить src/generic-logo.svg.
+4. Заменить src/lounge-background-premium.webp.
+5. При желании изменить цвета в brand-config.js.
+6. Создать отдельный Supabase-проект.
+7. Выполнить schema.sql и upgrade-v22.sql.
+8. Создать администратора и выполнить make-admin.sql.
+9. Добавить VITE_SUPABASE_URL и VITE_SUPABASE_PUBLISHABLE_KEY в Vercel.
+10. Заполнить меню через админку.
+11. Проверить #admin, стоп-лист, акции, правила и загрузку изображений.
+12. Подставить прямую ссылку на отзывы.

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 260">
+  <g fill="none" stroke="#d5ad61" stroke-width="5" stroke-linecap="round">
+    <path d="M400 28c-66 13-116 51-139 104 50-35 91-38 139-13 48-25 89-22 139 13-23-53-73-91-139-104Z"/>
+    <path d="M400 29v94m0-48-48-31m48 31 48-31"/>
+  </g>
+  <text x="400" y="187" text-anchor="middle" fill="#f5efe2" font-family="Georgia,serif" font-size="72" letter-spacing="4">YOUR VENUE</text>
+  <text x="400" y="229" text-anchor="middle" fill="#d5ad61" font-family="Arial,sans-serif" font-size="20" letter-spacing="12">MENU TEMPLATE</text>
+</svg>
