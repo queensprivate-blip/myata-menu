@@ -13,11 +13,11 @@ export const brand = {
     accentLight: '#e8c98a',
     accentMuted: 'rgba(207, 166, 91, 0.55)',
     text: '#f7f2e8',
-    muted: '#b8ae9a',
-    surface: 'rgba(8, 8, 9, 0.94)',
-    surfaceSoft: 'rgba(16, 14, 12, 0.86)',
+    muted: '#c7baa9',
+    surface: 'rgba(33, 24, 18, 0.94)',
+    surfaceSoft: 'rgba(44, 32, 23, 0.86)',
     border: 'rgba(207, 166, 91, 0.26)',
-    background: '#050505',
+    background: '#0f0a08',
   },
 };
 
