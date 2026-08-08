@@ -1,4 +1,4 @@
--- QR Menu Template: расширенная админка. Выполнить один раз после schema.sql/seed.sql.
+-- МЯТА PLATINUM СПАРТАК: расширенная админка. Выполнить после schema.sql.
 
 alter table public.menu_items add column if not exists archived boolean not null default false;
 alter table public.menu_items add column if not exists badge text not null default '';
@@ -36,10 +36,10 @@ create table if not exists public.rules (
 
 create table if not exists public.venue_settings (
   id integer primary key default 1 check (id = 1),
-  venue_name text not null default 'Название заведения',
-  address text not null default 'Город, улица, дом',
-  phone text not null default '+7 (999) 000-00-00',
-  hours text not null default 'Ежедневно 12:00–02:00',
+  venue_name text not null default 'МЯТА PLATINUM СПАРТАК',
+  address text not null default 'Волоколамское ш., 71, корп. 1',
+  phone text not null default '+7 (985) 006-62-61',
+  hours text not null default 'пн-чт 12:00-01:00, пт 12:00-02:00, сб 14:00-02:00, вс 14:00-01:00',
   review_url text not null default '',
   updated_at timestamptz not null default now()
 );

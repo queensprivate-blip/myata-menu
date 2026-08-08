@@ -491,8 +491,7 @@ function home() {
             <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7A2.5 2.5 0 0 1 17.5 15H10l-5 4v-4.5A2.5 2.5 0 0 1 4 12.5v-7Z"/><path d="m9 9 2 2 4-4"/></svg>
           </div>
           <div class="review-dialog-heading">
-            <span>Нам важно ваше мнение</span>
-            <h2 id="review-dialog-title">Оставить отзыв</h2>
+            <span id="review-dialog-title">Нам важно ваше мнение</span>
           </div>
           <p>Если вам всё понравилось или у вас есть предложения, поделитесь впечатлениями о нас. Ваш отзыв помогает нам становиться лучше, и мы будем вам очень благодарны.</p>
           <a class="review-dialog-link" href="${esc((remoteVenue?.review_url || venue.reviewUrl))}" target="_blank" rel="noopener noreferrer">Перейти к отзыву в картах</a>
