@@ -77,6 +77,55 @@ const brownThemeOverrides = `
   background: rgba(46, 29, 15, 0.93);
 }
 
+/* Акции: карточки и карусель */
+.promotion-slide {
+  background: rgba(43, 27, 14, 0.94);
+}
+
+.promotion-slide > img {
+  background: #160d07;
+}
+
+.promotion-slide-copy {
+  background: rgba(43, 27, 14, 0.96);
+}
+
+/* Отзывы */
+.review-dialog::backdrop {
+  background: rgba(20, 12, 5, 0.80);
+}
+
+.review-dialog-card {
+  background: linear-gradient(180deg, rgba(51, 32, 17, 0.99), rgba(35, 22, 11, 0.99));
+}
+
+.review-dialog-icon {
+  background: rgba(201, 161, 92, 0.10);
+}
+
+.review-dialog-link {
+  background: linear-gradient(180deg, rgba(201, 161, 92, 0.20), rgba(201, 161, 92, 0.10));
+}
+
+/* Верхние быстрые столбцы/кнопки внутри разделов меню */
+.menu-quick-nav button {
+  color: rgba(246, 238, 218, 0.88);
+  background: rgba(47, 30, 17, 0.90);
+  border: 1px solid rgba(201, 161, 92, 0.12);
+}
+
+.menu-quick-nav button:hover,
+.menu-quick-nav button:focus-visible {
+  color: var(--gold-light);
+  background: rgba(58, 36, 18, 0.96);
+}
+
+.menu-quick-nav button:active,
+.menu-quick-nav button.is-active {
+  color: var(--gold-light);
+  background: rgba(68, 42, 21, 0.98);
+}
+
 /* Новые элементы патча v35 тоже держим в старой коричневой гамме */
 .admin-shell,
 .admin-panel,
@@ -107,7 +156,8 @@ const brownThemeOverrides = `
 .admin-form-card,
 .admin-item-card,
 .admin-list-card,
-.admin-category-card {
+.admin-category-card,
+.admin-pro-card {
   background-color: var(--admin-brown);
   border-color: rgba(201, 161, 92, 0.24);
 }
@@ -117,10 +167,33 @@ const brownThemeOverrides = `
 .admin-textarea,
 .admin-search,
 .admin-upload,
-.admin-image-box {
+.admin-image-box,
+.admin-tab-toolbar input,
+.admin-tab-toolbar select,
+.admin-field input,
+.admin-field select,
+.admin-field textarea {
   background-color: rgba(31, 19, 9, 0.88);
   border-color: rgba(201, 161, 92, 0.24);
   color: var(--text);
+}
+
+.admin-tabs button {
+  background: rgba(52, 32, 16, 0.78);
+  color: #d8c8b3;
+}
+
+.admin-tabs button.is-active,
+.admin-primary,
+.admin-toast {
+  background: #c9a15c;
+  color: #24160b;
+}
+
+.admin-banner-preview,
+.admin-file-picker,
+.admin-file-preview {
+  background-color: rgba(24, 14, 7, 0.92);
 }
 
 dialog::backdrop {
