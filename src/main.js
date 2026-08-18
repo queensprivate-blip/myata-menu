@@ -114,6 +114,34 @@ let remotePromotions = null;
 let remoteRules = null;
 let remoteVenue = null;
 
+function syncRemoteOnlyItems(rows = []) {
+  barCategories.forEach((category) => { category.items = category.items.filter((item) => !item.__remoteOnly); });
+  for (let i = hookahItems.length - 1; i >= 0; i -= 1) if (hookahItems[i].__remoteOnly) hookahItems.splice(i, 1);
+
+  const knownKeys = new Set();
+  barCategories.forEach((category) => category.items.forEach((item) => knownKeys.add(item.remoteKey)));
+  hookahItems.forEach((item) => knownKeys.add(item.remoteKey));
+
+  rows.filter((row) => !row.archived).forEach((row) => {
+    if (knownKeys.has(row.item_key)) return;
+    const item = {
+      __remoteOnly: true,
+      remoteKey: row.item_key,
+      name: row.name,
+      description: row.description || '',
+      volume: row.volume || '',
+      price: Number(row.price) || 0,
+      image: row.image_url || '',
+    };
+    if (row.type === 'hookah') {
+      hookahItems.push(item);
+      return;
+    }
+    const category = barCategories.find((entry) => entry.id === row.section_id);
+    if (category) category.items.push(item);
+  });
+}
+
 
 function readAdminOverrides() {
   try {
@@ -475,6 +503,10 @@ function home() {
     <section class="home-content">
       <button class="brand-trigger" type="button" data-venue-open aria-label="Открыть информацию о заведении">
         <img class="brand-logo" src="${logoUrl}" alt="${esc(brand.venueName)}">
+        <span class="brand-callout" aria-hidden="true">
+          <span class="brand-callout-icon">i</span>
+          <span class="brand-callout-copy">Информация о заведении</span>
+        </span>
       </button>
 
       <nav class="home-menu" aria-label="Разделы меню">
@@ -491,7 +523,8 @@ function home() {
             <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7A2.5 2.5 0 0 1 17.5 15H10l-5 4v-4.5A2.5 2.5 0 0 1 4 12.5v-7Z"/><path d="m9 9 2 2 4-4"/></svg>
           </div>
           <div class="review-dialog-heading">
-            <span id="review-dialog-title">Нам важно ваше мнение</span>
+            <span>Нам важно ваше мнение</span>
+            <h2 id="review-dialog-title">Оставить отзыв</h2>
           </div>
           <p>Если вам всё понравилось или у вас есть предложения, поделитесь впечатлениями о нас. Ваш отзыв помогает нам становиться лучше, и мы будем вам очень благодарны.</p>
           <a class="review-dialog-link" href="${esc((remoteVenue?.review_url || venue.reviewUrl))}" target="_blank" rel="noopener noreferrer">Перейти к отзыву в картах</a>
@@ -516,6 +549,13 @@ function home() {
             <div>
               <span>Режим работы</span><strong>${esc((remoteVenue?.hours || venue.hours))}</strong>
             </div>
+            <div>
+              <span>Правила посещения</span><strong>Посещение заведения допускается только для гостей 18+.</strong>
+            </div>
+            ${(remoteVenue?.telegram_url || brand.telegramUrl) ? `
+              <a href="${esc(remoteVenue?.telegram_url || brand.telegramUrl)}" target="_blank" rel="noopener noreferrer">
+                <span>Telegram</span><strong>${esc(remoteVenue?.telegram_label || brand.telegramLabel || 'Открыть канал')}</strong>
+              </a>` : ''}
           </div>
         </div>
       </dialog>
@@ -742,6 +782,7 @@ async function loadRemoteMenu() {
     const { data, error } = await supabase.from('menu_items').select('*').order('sort_order');
     if (error) throw error;
     remoteMenuItems = new Map((data || []).map((row) => [row.item_key, row]));
+    syncRemoteOnlyItems(data || []);
     const [promoRes, rulesRes, venueRes] = await Promise.all([
       supabase.from('promotions').select('*').eq('visible', true).order('sort_order'),
       supabase.from('rules').select('*').eq('visible', true).order('sort_order'),
@@ -762,6 +803,10 @@ async function bootstrap() {
   adminSession = data.session;
   await loadRemoteMenu();
   window.addEventListener('hashchange', route);
+  window.addEventListener('myata-menu-updated', async () => {
+    await loadRemoteMenu();
+    route();
+  });
   supabase.auth.onAuthStateChange((_event, session) => { adminSession = session; });
   route();
 }
